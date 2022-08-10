@@ -29,6 +29,7 @@ import os
 import timeit
 
 import pytest
+import userstorage
 
 from vdsm import utils
 from vdsm.common.units import GiB
@@ -40,7 +41,8 @@ from vdsm.storage import xlease
 from testlib import make_uuid
 
 from . fakesanlock import FakeSanlock
-from . import userstorage
+
+BACKENDS = userstorage.load_config("storage.py").BACKENDS
 
 
 class ReadError(Exception):
@@ -64,8 +66,8 @@ class FailingWriter(xlease.DirectFile):
 @pytest.fixture(
     scope="module",
     params=[
-        userstorage.PATHS["file-512"],
-        userstorage.PATHS["file-4k"],
+        BACKENDS["file-512"],
+        BACKENDS["file-4k"],
     ],
     ids=str,
 )
@@ -132,19 +134,19 @@ class TemporaryVolume(object):
 
 @pytest.fixture(params=[
     pytest.param(
-        (userstorage.PATHS["file-512"], sc.ALIGNMENT_1M),
+        (BACKENDS["file-512"], sc.ALIGNMENT_1M),
         id="file-512-1m"),
     pytest.param(
-        (userstorage.PATHS["file-4k"], sc.ALIGNMENT_1M),
+        (BACKENDS["file-4k"], sc.ALIGNMENT_1M),
         id="file-4k-1m"),
     pytest.param(
-        (userstorage.PATHS["file-4k"], sc.ALIGNMENT_2M),
+        (BACKENDS["file-4k"], sc.ALIGNMENT_2M),
         id="file-4k-2m"),
     pytest.param(
-        (userstorage.PATHS["file-4k"], sc.ALIGNMENT_4M),
+        (BACKENDS["file-4k"], sc.ALIGNMENT_4M),
         id="file-4k-4m"),
     pytest.param(
-        (userstorage.PATHS["file-4k"], sc.ALIGNMENT_8M),
+        (BACKENDS["file-4k"], sc.ALIGNMENT_8M),
         id="file-4k-8m"),
 ])
 def tmp_vol(request):

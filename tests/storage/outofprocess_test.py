@@ -34,15 +34,17 @@ import weakref
 from contextlib import contextmanager
 
 import pytest
+import userstorage
 
 from vdsm.common.osutils import get_umask
 from vdsm.storage import constants as sc
 from vdsm.storage import outOfProcess as oop
 from vdsm.storage.exception import MiscDirCleanupFailure
 
-from . import userstorage
 from . marks import requires_root, requires_unprivileged_user
 from . storagetestlib import chmod
+
+BACKENDS = userstorage.load_config("storage.py").BACKENDS
 
 
 @pytest.fixture
@@ -53,8 +55,8 @@ def oop_cleanup():
 
 @pytest.fixture(
     params=[
-        userstorage.PATHS["mount-512"],
-        userstorage.PATHS["mount-4k"],
+        BACKENDS["mount-512"],
+        BACKENDS["mount-4k"],
     ],
     ids=str,
 )

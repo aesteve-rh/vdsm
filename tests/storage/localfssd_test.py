@@ -30,6 +30,7 @@ import time
 import uuid
 
 import pytest
+import userstorage
 
 from vdsm.common.units import MiB, GiB
 from vdsm.storage import clusterlock
@@ -41,10 +42,10 @@ from vdsm.storage import qemuimg
 from vdsm.storage import sd
 
 from . import qemuio
-from . import userstorage
 from . marks import requires_unprivileged_user
 from . storagetestlib import chmod
 
+BACKENDS = userstorage.load_config("storage.py").BACKENDS
 PREALLOCATED_VOL_SIZE = 10 * MiB
 SPARSE_VOL_SIZE = GiB
 INITIAL_VOL_SIZE = MiB
@@ -59,19 +60,19 @@ DETECT_BLOCK_SIZE = [
 @pytest.fixture(
     params=[
         pytest.param(
-            (userstorage.PATHS["mount-512"], sc.HOSTS_512_1M, 3),
+            (BACKENDS["mount-512"], sc.HOSTS_512_1M, 3),
             id="mount-512-1m-v3"),
         pytest.param(
-            (userstorage.PATHS["mount-512"], sc.HOSTS_512_1M, 4),
+            (BACKENDS["mount-512"], sc.HOSTS_512_1M, 4),
             id="mount-512-1m-v4"),
         pytest.param(
-            (userstorage.PATHS["mount-512"], sc.HOSTS_512_1M, 5),
+            (BACKENDS["mount-512"], sc.HOSTS_512_1M, 5),
             id="mount-512-1m-v5"),
         pytest.param(
-            (userstorage.PATHS["mount-4k"], sc.HOSTS_4K_1M, 5),
+            (BACKENDS["mount-4k"], sc.HOSTS_4K_1M, 5),
             id="mount-4k-1m-v5"),
         pytest.param(
-            (userstorage.PATHS["mount-4k"], sc.HOSTS_4K_2M, 5),
+            (BACKENDS["mount-4k"], sc.HOSTS_4K_2M, 5),
             id="mount-4k-2m-v5"),
     ]
 )
@@ -83,11 +84,11 @@ def user_mount(request):
 @pytest.fixture(
     params=[
         pytest.param(
-            (userstorage.PATHS["mount-512"], 2000, 5), id="mount-512-1m-v5"),
+            (BACKENDS["mount-512"], 2000, 5), id="mount-512-1m-v5"),
         pytest.param(
-            (userstorage.PATHS["mount-4k"], 250, 5), id="mount-4k-1m-v5"),
+            (BACKENDS["mount-4k"], 250, 5), id="mount-4k-1m-v5"),
         pytest.param(
-            (userstorage.PATHS["mount-4k"], 500, 5), id="mount-4k-2m-v5"),
+            (BACKENDS["mount-4k"], 500, 5), id="mount-4k-2m-v5"),
     ]
 )
 def user_mount_v5(request):

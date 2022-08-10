@@ -182,14 +182,11 @@ run_tests_storage() {
     create_loop_devices 16
 
     install_lvmlocal_conf
-    setup_storage
+    # Set up storage for storage tests. The storage is tore down in teardown().
+    make storage
     make tests-storage
 }
 
-# Set up storage for storage tests. The storage is tore down in teardown().
-setup_storage() {
-    ${CI_PYTHON} tests/storage/userstorage.py setup
-}
 
 # Teardown storage set up in setup_storage.
 # We must teardown loop devices and mounts, otherwise mock fail to remove the
@@ -202,7 +199,7 @@ teardown_storage() {
     res=$?
     [ "$res" -ne 0 ] && echo "*** err: $res"
 
-    ${CI_PYTHON} tests/storage/userstorage.py teardown \
+    make clean-storage \
         || echo "WARNING: Ingoring error while tearing down user storage"
 
     collect_logs
