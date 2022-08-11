@@ -5,7 +5,7 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    container: quay.io/ovirt/vdsm-test-centos-8
+    container: quay.io/alesgar/vdsm-test-centos-8
     steps:
     - uses: actions/checkout@v2
     - name: Run linters
@@ -15,7 +15,7 @@ jobs:
       TRAVIS_CI: 1
     runs-on: ubuntu-latest
     container:
-      image: quay.io/ovirt/vdsm-test-centos-8
+      image: quay.io/alesgar/vdsm-test-centos-8
       # Required to create loop devices.
       options: --privileged
     steps:
@@ -27,7 +27,7 @@ jobs:
       TRAVIS_CI: 1
     runs-on: ubuntu-latest
     container:
-      image: quay.io/ovirt/vdsm-test-centos-8
+      image: quay.io/alesgar/vdsm-test-centos-8
       # Required to create loop devices.
       options: --privileged
     steps:
@@ -39,7 +39,7 @@ jobs:
       TRAVIS_CI: 1
     runs-on: ubuntu-latest
     container:
-      image: quay.io/ovirt/vdsm-test-centos-8
+      image: quay.io/alesgar/vdsm-test-centos-8
       # Needed for many operations, i.e. creating bridges
       options: --privileged
     steps:
@@ -48,7 +48,7 @@ jobs:
       run: ./automation/tests.sh
   rpm:
     runs-on: ubuntu-latest
-    container: quay.io/ovirt/vdsm-test-centos-8
+    container: quay.io/alesgar/vdsm-test-centos-8
     steps:
     # we need the tags to be pulled for RPMs to have proper versions
     - uses: actions/checkout@v2
