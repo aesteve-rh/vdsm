@@ -54,6 +54,7 @@ from vdsm.storage.task import Task, Recovery
 
 import fakelib
 from .fakesanlock import FakeSanlock
+from .storage_backend import Backend
 from . import tmpfs
 from . import tmprepo
 from . import tmpstorage
@@ -154,10 +155,8 @@ def tmp_storage(monkeypatch, tmpdir):
     ids=str,
 )
 def tmp_mount(request):
-    mount = request.param
-    if not mount.exists():
-        pytest.xfail("{} storage not available".format(mount.name))
-    return mount
+    with Backend(request.param) as backend:
+        yield backend
 
 
 @pytest.fixture

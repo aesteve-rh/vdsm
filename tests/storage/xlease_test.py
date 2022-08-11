@@ -41,6 +41,7 @@ from vdsm.storage import xlease
 from testlib import make_uuid
 
 from . fakesanlock import FakeSanlock
+from . storage_backend import Backend
 
 BACKENDS = userstorage.load_config("storage.py").BACKENDS
 
@@ -72,10 +73,8 @@ class FailingWriter(xlease.DirectFile):
     ids=str,
 )
 def user_storage(request):
-    storage = request.param
-    if not storage.exists():
-        pytest.xfail("{} storage not available".format(storage.name))
-    return storage
+    with Backend(request.param) as backend:
+        yield backend
 
 
 class TemporaryVolume(object):
@@ -151,13 +150,12 @@ class TemporaryVolume(object):
 ])
 def tmp_vol(request):
     storage, alignment = request.param
-    if not storage.exists():
-        pytest.xfail("{} storage not available".format(storage.name))
-    backend = xlease.DirectFile(storage.path)
-    tv = TemporaryVolume(backend, alignment, block_size=storage.sector_size)
-
-    yield tv
-    tv.close()
+    with Backend(storage):
+        backend = xlease.DirectFile(storage.path)
+        tv = TemporaryVolume(
+            backend, alignment, block_size=storage.sector_size)
+        yield tv
+        tv.close()
 
 
 @pytest.fixture

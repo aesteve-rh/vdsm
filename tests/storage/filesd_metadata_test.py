@@ -31,6 +31,7 @@ from vdsm.storage import fileSD
 from vdsm.storage import outOfProcess as oop
 from vdsm.storage import sd
 
+from . storage_backend import Backend
 
 EXAMPLE_DATA = {
     (sc.BLOCK_SIZE_512, sc.ALIGNMENT_1M): """\
@@ -108,14 +109,11 @@ Storage = collections.namedtuple("Storage", "path, block_size, alignment")
 )
 def storage(request):
     storage, alignment = request.param
-    if not storage.exists():
-        pytest.xfail("{} storage not available".format(storage.name))
-
-    with open(storage.path, "w") as f:
-        f.truncate(0)
-
-    yield Storage(storage.path, storage.sector_size, alignment)
-    oop.stop()
+    with Backend(storage) as backend:
+        with open(backend.path, "w") as f:
+            f.truncate(0)
+        yield Storage(backend.path, backend.block_size, alignment)
+        oop.stop()
 
 
 def make_metadata(storage):

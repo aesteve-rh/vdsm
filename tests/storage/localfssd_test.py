@@ -23,9 +23,7 @@ from __future__ import absolute_import
 from __future__ import division
 
 import os
-import shutil
 import stat
-import tempfile
 import time
 import uuid
 
@@ -43,6 +41,7 @@ from vdsm.storage import sd
 
 from . import qemuio
 from . marks import requires_unprivileged_user
+from . storage_backend import Backend
 from . storagetestlib import chmod
 
 BACKENDS = userstorage.load_config("storage.py").BACKENDS
@@ -1431,7 +1430,7 @@ def verify_volume_file(
         assert 'backing-filename' not in qemu_info
 
 
-class Config(object):
+class Config(Backend):
     """
     Wrap a userstorage.Path implementation, adding a block_size, max_hosts and
     domain_version to simplify fixtures using storage for creating mounts
@@ -1439,19 +1438,9 @@ class Config(object):
     """
 
     def __init__(self, storage, max_hosts, domain_version):
-        if not storage.exists():
-            pytest.xfail("{} storage not available".format(storage.name))
-
-        self.path = tempfile.mkdtemp(dir=storage.path)
-        self.block_size = storage.sector_size
+        super().__init__(storage)
         self.max_hosts = max_hosts
         self.domain_version = domain_version
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        shutil.rmtree(self.path)
 
     def __repr__(self):
         rep = "path: {}, block size: {}, max hosts: {}, domain version: {}"

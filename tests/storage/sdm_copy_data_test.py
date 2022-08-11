@@ -47,6 +47,7 @@ from storage.storagetestlib import (
 )
 
 from . import qemuio
+from . storage_backend import Backend
 
 from testValidation import broken_on_ci
 from testlib import make_uuid
@@ -78,10 +79,8 @@ DEFAULT_SIZE = MiB
     ids=str,
 )
 def user_mount(request):
-    mount = request.param
-    if not mount.exists():
-        pytest.xfail("{} storage not available".format(mount.name))
-    return mount
+    with Backend(request.param) as backend:
+        yield backend
 
 
 @expandPermutations

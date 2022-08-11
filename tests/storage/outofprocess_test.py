@@ -42,6 +42,7 @@ from vdsm.storage import outOfProcess as oop
 from vdsm.storage.exception import MiscDirCleanupFailure
 
 from . marks import requires_root, requires_unprivileged_user
+from . storage_backend import Backend
 from . storagetestlib import chmod
 
 BACKENDS = userstorage.load_config("storage.py").BACKENDS
@@ -61,13 +62,11 @@ def oop_cleanup():
     ids=str,
 )
 def user_mount(request):
-    storage = request.param
-    if not storage.exists():
-        pytest.xfail("{} storage not available".format(storage.name))
-    tmpdir = os.path.join(storage.path, "tmp")
-    os.mkdir(tmpdir)
-    yield tmpdir
-    shutil.rmtree(tmpdir)
+    with Backend(request.param) as backend:
+        tmpdir = os.path.join(backend.path, "tmp")
+        os.mkdir(tmpdir)
+        yield tmpdir
+        shutil.rmtree(tmpdir)
 
 
 # TODO: the following 2 tests use private instance variables that

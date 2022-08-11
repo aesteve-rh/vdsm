@@ -29,6 +29,7 @@ from vdsm.storage import sanlock_direct
 from vdsm.storage import constants as sc
 
 from .marks import requires_root
+from .storage_backend import Backend
 
 # Wait 1 second for lockspace initialization for quick tests.
 INIT_LOCKSPACE_TIMEOUT = 1
@@ -49,13 +50,10 @@ Storage = namedtuple("Storage", "path, block_size, alignment")
 )
 def storage(request):
     storage, alignment = request.param
-    if not storage.exists():
-        pytest.xfail("{} storage not available".format(storage.name))
-
-    with open(storage.path, "wb") as f:
-        f.truncate()
-
-    yield Storage(storage.path, storage.sector_size, alignment)
+    with Backend(storage) as backend:
+        with open(backend.path, "wb") as f:
+            f.truncate()
+        yield Storage(backend.path, backend.block_size, alignment)
 
 
 @requires_root
